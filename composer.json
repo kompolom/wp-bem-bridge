@@ -1,7 +1,8 @@
 {
-    "name": "kompolom/wp-bem-bridge",
+    "name": "kompolom/WPBEM",
     "type": "wordpress-muplugin",
     "require": {
-        "composer/installers": "~1.0"
+        "composer/installers": "~1.0",
+        "bem/bh" : "~4.0"
     }
 }

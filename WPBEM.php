@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Wordpress-BEM bridge
  * Description: Позволяет писать шаблоны в терминах БЭМ
- * Version: 0.1
+ * Version: 0.2.0
  * Author: Evgeniy Baranov
  * Author URI: http://kompolom.ru
  * License: MIT
@@ -11,6 +11,7 @@
  * @package     Wordpress
  */
 
+namespace kompolom;
 
 define('block', 'block');
 define('elem', 'elem');
@@ -19,7 +20,7 @@ define('content', 'content');
 define('mix', 'mix');
 define('js', 'js');
 
-class BemBridge {
+class WPBEM {
 
     const HTML = 1,
           BEMJSON = 2;
@@ -50,7 +51,7 @@ class BemBridge {
     }
 
     public static function get_instance($bundle = 'index', $includeBemjson = false){
-        return self::$instance? self::$instance : new BemBridge($bundle, $includeBemjson);
+        return self::$instance? self::$instance : new WPBEM($bundle, $includeBemjson);
     }
 
     /**
