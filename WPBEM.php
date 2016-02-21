@@ -54,6 +54,10 @@ class WPBEM {
         return self::$instance? self::$instance : new WPBEM($bundle, $includeBemjson);
     }
 
+    public static function instance($bundle = 'index', $includeBemjson = false){
+        return self::$instance? self::$instance : new WPBEM($bundle, $includeBemjson);
+    }
+
     /**
      * Sets current platform global variavles
      * @param [$platform] platform name
