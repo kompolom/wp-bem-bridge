@@ -59,13 +59,32 @@ class WPBEM {
     }
 
     /**
+     * autodetect needle platform
+     * @return {String} platform name
+     */
+    function autoselect_patoform()
+    {
+        $MobileDetect = new \Mobile_Detect;
+        if (is_admin()) {
+            $platform = 'admin';
+        } elseif ($MobileDetect->isTablet()) {
+            $platform = 'touch-pad';
+        } elseif ($MobileDetect->isMobile()) {
+            $platform = 'touch-phone';
+        } else {
+            $platform = 'desktop';
+        }
+        return $platform;
+    }
+
+    /**
      * Sets current platform global variavles
      * @param [$platform] platform name
      * @return void
      */
     function init_platform()
     {
-        //$platform = !is_null($platform)? $platform : autoselect_patoform();
+        $this->platform = $this->autoselect_patoform();
         $platform = $this->platform;
         $this->bundles_url = get_bloginfo('template_url')."/$platform.pages/";
         $this->bundles_path = TEMPLATEPATH."/$platform.pages/";
