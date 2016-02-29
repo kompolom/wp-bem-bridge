@@ -43,7 +43,7 @@ class WPBEM {
         $this->init_platform();
         $this->init_bundle();
 
-        if (filter_var(getenv('TPL_DEBUG'), FILTER_VALIDATE_BOOLEAN)) { $this->bem_make(); }
+        //if (filter_var(getenv('TPL_DEBUG'), FILTER_VALIDATE_BOOLEAN)) { $this->bem_make(); }
         $this->register_bundle_static();
         if ($this->includeBemjson) {
             $this->bemjson = (include $this->locate_bundle($this->bundle));
@@ -84,10 +84,14 @@ class WPBEM {
      */
     function init_platform()
     {
-        $this->platform = $this->autoselect_patoform();
         $platform = $this->platform;
         $this->bundles_url = get_bloginfo('template_url')."/$platform.pages/";
         $this->bundles_path = TEMPLATEPATH."/$platform.pages/";
+    }
+
+    function set_platform($platform = null)
+    {
+        $this->platform = $platform? $platform : $this->autoselect_patoform();
     }
 
     /**
@@ -98,6 +102,7 @@ class WPBEM {
     */
     function init_bundle()
     {
+        $this->btree = (include $this->locate_bundle($this->bundle, true, 'btree.php', true));
         $this->engine = (include $this->locate_bundle($this->bundle, true, 'bh.php', true));
     }
 
@@ -143,7 +148,7 @@ class WPBEM {
         if(file_exists($this->bundles_path.$subpath)) {
             return $this->bundles_path.$subpath;
         } elseif (file_exists(TEMPLATEPATH."/desktop.pages/".$subpath)) {
-            if ($rewritePlatform){ set_platform('desktop');}
+            if ($rewritePlatform){ $this->set_platform('desktop');}
             return TEMPLATEPATH."/desktop.pages/".$subpath;
         } elseif (!$nofb and file_exists(TEMPLATEPATH."/$bundle.$suffix")) {
             return TEMPLATEPATH."/$bundle.$suffix";
@@ -180,6 +185,41 @@ class WPBEM {
         return $format === self::HTML? $this->engine->apply($bemjson) : json_encode($bemjson, JSON_UNESCAPED_UNICODE);
     }
 
+    public function render($data = null){
+        $this->html($this->get_ctx($data));
+    }
+
+    function get_ctx($data){
+        return $this->build_tree([
+            'block' => 'root',
+            'view' => $this->bundle,
+            'head' => $this->get_wphead(),
+            'footer' => $this->get_wpfoot(),
+            'title' => wp_title('', false),
+            'data' => $data
+        ]);
+    }
+
+    public function build_tree($data){
+        return $this->btree->processBemJson($data);
+    }
+
+    function get_wphead(){
+        ob_start();
+        wp_head();
+        $content = ob_get_contents();
+        ob_end_clean();
+        return $content;
+    }
+
+    function get_wpfoot(){
+        ob_start();
+        wp_footer();
+        $content = ob_get_contents();
+        ob_end_clean();
+        return $content;
+    }
+
     /**
     * Register static files for bundle
     * @return void
@@ -189,8 +229,8 @@ class WPBEM {
         $BUNDLE = $this->bundle;
         $BUNDLES_URL = $this->bundles_url;
         $ver = wp_get_theme()->version;
-        wp_register_script($BUNDLE."-js", $BUNDLES_URL.$BUNDLE.'/_'.$BUNDLE.'.js', array(), $ver, true);
-        wp_register_style($BUNDLE."-css", $BUNDLES_URL.$BUNDLE.'/_'.$BUNDLE.'.css', [], $ver );
+        wp_register_script($BUNDLE."-js", $BUNDLES_URL.$BUNDLE.'/'.$BUNDLE.'.js', array(), $ver, true);
+        wp_register_style($BUNDLE."-css", $BUNDLES_URL.$BUNDLE.'/'.$BUNDLE.'.css', [], $ver );
         wp_enqueue_script($BUNDLE.'-js');
         wp_enqueue_style($BUNDLE.'-css');
     }
