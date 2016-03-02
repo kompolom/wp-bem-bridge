@@ -43,7 +43,7 @@ class WPBEM {
         $this->init_platform();
         $this->init_bundle();
 
-        //if (filter_var(getenv('TPL_DEBUG'), FILTER_VALIDATE_BOOLEAN)) { $this->bem_make(); }
+        if (filter_var(getenv('TPL_DEBUG'), FILTER_VALIDATE_BOOLEAN)) { $this->bem_make(); }
         $this->register_bundle_static();
         if ($this->includeBemjson) {
             $this->bemjson = (include $this->locate_bundle($this->bundle));
