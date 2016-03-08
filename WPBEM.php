@@ -84,6 +84,7 @@ class WPBEM {
      */
     function init_platform()
     {
+        $this->set_platform();
         $platform = $this->platform;
         $this->bundles_url = get_bloginfo('template_url')."/$platform.pages/";
         $this->bundles_path = TEMPLATEPATH."/$platform.pages/";
