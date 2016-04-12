@@ -29,6 +29,7 @@ class WPBEM {
     protected $bundles_url; //Url старических файлов
     protected $platform = 'desktop'; //Текущая платформа
     protected $bundle = 'index'; //Текущий бандл
+    protected $scope = 'public';
     protected $includeBemjson; //Подключить <bundle>.php
     public $bemjson = [];
     public $engine;
@@ -190,9 +191,15 @@ class WPBEM {
         $this->html($this->get_ctx($data));
     }
 
+    public function set_scope($scope = 'public') {
+        $this->scope = $scope;
+        return $this;
+    }
+
     function get_ctx($data){
         return $this->build_tree([
             'block' => 'root',
+            'scope' => $this->scope,
             'view' => $this->bundle,
             'head' => $this->get_wphead(),
             'footer' => $this->get_wpfoot(),
