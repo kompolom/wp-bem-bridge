@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Wordpress-BEM bridge
  * Description: Позволяет писать шаблоны в терминах БЭМ
- * Version: 0.2.0
+ * Version: 0.2.1
  * Author: Evgeniy Baranov
  * Author URI: http://kompolom.ru
  * License: MIT
@@ -60,7 +60,8 @@ class WPBEM {
     }
 
     /**
-     * autodetect needle platform
+     * Aвтоматичестки определяет нужную платформу на основе браузера
+     * пользователя
      * @return {String} platform name
      */
     function autoselect_patoform()
@@ -79,8 +80,7 @@ class WPBEM {
     }
 
     /**
-     * Sets current platform global variavles
-     * @param [$platform] platform name
+     * Инициализирует свойства зависящие от платформы.
      * @return void
      */
     function init_platform()
@@ -91,17 +91,22 @@ class WPBEM {
         $this->bundles_path = TEMPLATEPATH."/$platform.pages/";
     }
 
+    /**
+     * Устанавливает внутренюю переменную $platform в соответствии с переданным
+     * параметром, или на основе браузера пользователя, если платформа не
+     * указана.
+     * @param string $platform платформа
+     * @return void
+     */
     function set_platform($platform = null)
     {
         $this->platform = $platform? $platform : $this->autoselect_patoform();
     }
 
     /**
-    * Provide bundle,
-    * Provide BH.php template engine 
-    * @param string $bundle selected bundle name
-    * @return void
-    */
+     * Подключает шаблонизаторы.
+     * @return void
+     */
     function init_bundle()
     {
         $this->btree = (include $this->locate_bundle($this->bundle, true, 'btree.php', true));
@@ -119,10 +124,14 @@ class WPBEM {
     {
         $platform = $this->platform;
         $target = $this->bundle;
-        self::$stat = exec("cd ".TEMPLATEPATH." && ./node_modules/enb/bin/enb make $platform.pages/$target");// $platform.pages/$target");
+        self::$stat = exec("cd ".TEMPLATEPATH." && ./node_modules/enb/bin/enb make $platform.pages/$target");
         add_action('wp_head', array($this, 'inject_stat'));
     }
 
+    /**
+     * Добавляет отладочную информацию в вывод.
+     * @callback
+     */
     function inject_stat(){
         $stat = self::$stat;
         echo "<script>console.log('$this->platform.$this->bundle: $stat');</script>";
@@ -130,7 +139,7 @@ class WPBEM {
 
 
     /**
-     * Returns needle bundle for current platform
+     * Подключает и возвращает бандл с шаблонами для текущей платформы
      * @param string $bundle bundle name
      * @return mixed include result
      */
@@ -140,8 +149,10 @@ class WPBEM {
     }
 
     /**
-     * Search bundle
-     * @param srting $bundle_name bundle to search
+     * Ищет бандл на файловой системе.
+     * @param srting $bundle искомый бандл
+     * @param bool $nofb не использовать fallback механизм
+     * @param srting $suffix расширение файла. (bh.php, btree.php)
      * @return bundle path if found, has fallback to desktop level
      */
     function locate_bundle($bundle, $nofb = false, $suffix = 'php', $rewritePlatform = false)
@@ -175,6 +186,9 @@ class WPBEM {
         echo $this->res($bemjson? $bemjson : $this->bemjson);
     }
 
+    /**
+     * Выводит json строку
+     */
     public function json($bemjson = null) {
         echo $this->res($bemjson? $bemjson : $this->bemjson, self::BEMJSON);
     }
@@ -187,6 +201,13 @@ class WPBEM {
         return $format === self::HTML? $this->engine->apply($bemjson) : json_encode($bemjson, JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * Оборачивает данные в корневой блок и выводит готовую html строку. Главным
+     * образом предназначена для отдачи целых страниц. В 99% случаях именно этот
+     * метод стоит вызвать для получения результата.
+     * @param mixed $data исходные данные для шаблонизации
+     * @return void
+     */
     public function render($data = null){
         $this->html($this->get_ctx($data));
     }
@@ -196,6 +217,10 @@ class WPBEM {
         return $this;
     }
 
+    /**
+     * Оборачивает данные в корневой блок - входную точку для шаблонизатора
+     * @return array|object данные в формате BEMJSON
+     */
     function get_ctx($data){
         return $this->build_tree([
             'block' => 'root',
@@ -208,10 +233,18 @@ class WPBEM {
         ]);
     }
 
+    /**
+     * Строит BEMJSON по переданным данным. Аналог BEMTREE
+     * @return array|object BEMJSON
+     */
     public function build_tree($data){
         return $this->btree->processBemJson($data);
     }
 
+    /**
+     * Выполняет wordpress hook wp_head 
+     * @return string результат выполнения хука
+     */
     function get_wphead(){
         ob_start();
         wp_head();
@@ -220,6 +253,10 @@ class WPBEM {
         return $content;
     }
 
+    /**
+     * Выполняет wordpress hook wp_footer
+     * @return string результат выполнения хука
+     */
     function get_wpfoot(){
         ob_start();
         wp_footer();
@@ -229,9 +266,10 @@ class WPBEM {
     }
 
     /**
-    * Register static files for bundle
-    * @return void
-    */
+     * Регистрирует статические файлы с помощью стандартного Wordpress
+     * механизма.
+     * @return void
+     */
     function register_bundle_static()
     {
         $BUNDLE = $this->bundle;
