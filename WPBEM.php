@@ -69,8 +69,6 @@ class WPBEM {
         $MobileDetect = new \Mobile_Detect;
         if (is_admin()) {
             $platform = 'admin';
-        } elseif ($MobileDetect->isTablet()) {
-            $platform = 'touch-pad';
         } elseif ($MobileDetect->isMobile()) {
             $platform = 'touch-phone';
         } else {
