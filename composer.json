@@ -1,5 +1,5 @@
 {
-    "name": "kompolom/WPBEM",
+    "name": "kompolom/wpbem",
     "type": "wordpress-muplugin",
     "require": {
         "mobiledetect/mobiledetectlib": "^2.8",
